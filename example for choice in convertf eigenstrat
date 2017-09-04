@@ -1,0 +1,12 @@
+PATH: /home/kamanova@mcb.nsc.ru/dataset/EuropeFullyPublic
+genotypename: PATH/vdata.geno
+snpname:      PATH/vdata.snp
+indivname:    PATH/vdata.ind
+outputformat: PACKEDANCESTRYMAP
+genooutfilename:   /home/kamanova@mcb.nsc.ru/results/vdata_king.geno
+snpoutfilename:    /home/kamanova@mcb.nsc.ru/results/vdata_king.snp
+indoutfilename:    /home/kamanova@mcb.nsc.ru/results/vdata_king.ind
+poplistname: /home/kamanova@mcb.nsc.ru/results/poplist_king_chukchi
+
+
+
