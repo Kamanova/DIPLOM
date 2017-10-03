@@ -1,0 +1,233 @@
+Инструменты:
+convertf (понимает bed, geno, ped, делает geno, (ped и bed, но плохо - не делает bim, fam и map файлы))
+convertfs (понимает geno, делает bed или unpacked geno)
+plink (понимает bed и ped)
+king (понимает только bed)
+
+если при скачивании программы файл загрузился на сервер как текстовый, то ввести сhom a+x
+
+
+1. Скачали датасет (в запакованном eigenstrat формате)
+
+in.geno
+in.ind
+in.snp
+---
+
+2. Фильтруем датасет, чтобы оставить только чукчей
+
+Нужно запустить программу convertf:
+на входе in.geno, in.ind, in.snp
+на выходе out.geno, out.ind, out.snp
+(сохраняем формат PACKEDANCESTRYMAP)
+
+~/bin/bin/convertf -p ~/par/mydata
+ls 
+
+PATH: /home/kamanova@mcb.nsc.ru/dataset/EuropeFullyPublic
+genotypename: PATH/vdata.geno
+snpname:      PATH/vdata.snp
+indivname:    PATH/vdata.ind
+outputformat: PACKEDANCESTRYMAP
+genooutfilename:   /home/kamanova@mcb.nsc.ru/results/vdata_king.geno
+snpoutfilename:    /home/kamanova@mcb.nsc.ru/results/vdata_king.snp
+indoutfilename:    /home/kamanova@mcb.nsc.ru/results/vdata_king.ind
+poplistname: /home/kamanova@mcb.nsc.ru/results/poplist_king_chukchi
+
+---
+
+3. Конвертируем в bed для king'а
+
+Нужно запустить программу convertfs:
+на входе out.geno, out.ind, out.snp
+на выходе out.bed, out.bim, out.fam
+
+
+~/bin/convertfs -h вызвать помощь
+~/bin/convertfs -p ~/results/vdata_king запустиь программу. Сохранит файлы  bim bed fam тамже где и исходные файлы но в другом расширении.
+
+---
+
+4. Запускаем king
+~/bin/king -b ~/results/mydata.bed --prefix ~/results/king_final
+Можно построить по кингу  рса. Сами издатели говорят, что это не лучший инструмент, используй лучше программы Дэвида.
+~/bin/king -b ~/results/vdata_king.bed --prefix ~/results/king_f_pca --pca
+
+Если программа не запускается, то можно проверить совпадает ли она с программой исходной (оригинальной). 
+ md5sum ~/bin/мояпрограмма
+ e740bb746cf08795967b49a3f46e0c45  /home/kamanova@mcb.nsc.ru/bin/king дает индивидуальный код, если не совпадает с нужным, то каать надо другую.
+
+
+
+ ---
+ 5. Строим PCA через более надежную программу eigensoft
+  Создаем необходимый документ в par
+
+ Запуск программы  ~/bin/bin/smartpca -p ~/par/документ на вход > ~/папка куда надо сохранитьls r
+ при построении использовать ploteig
+ ~/bin/bin/ploteig -i ~/results/pca_Chukchi_4.09.17.evec -c 1:2 -p Chukchi1:Chukchi2:Chukchi3Chukchi4 -x  -o ~results/pca_all_Chukchi.xtxt
+ Чтобы посмотреть на расположение отдельных людей на картинке. Надо вписывать вместо одного человека много людей через двоеточие. ПРимер:  ~/bin/bin/ploteig -i ~/results/vdata_all_sib_for_chukchi7.09.17.evec -c 1:2 -p Yukagir_Tundra:Eskimo_Naukan:Eskimo_Chaplin:Chukchi_Reindeer:Chukchi1:Chukchi2:Chukchi3:Chukchi4:Chukchi5:Chukchi6:Chukchi7:Chukchi8:Chukchi9:Chukchi10:Chukchi11:Chukchi12:Chukchi13:Chukchi14:Chukchi15:Chukchi16:Chukchi17:Chukchi18:Chukchi19:Chukchi20:Ulchi:Koryak:Itelmen -x -o ~/results/PCA_enough_sib_for_chukchi7.09.17.xtxt~/bin/bin/smartpca -p ~/par/PCA_all_sib_for_chukchi7.09.17 > ~/results/PCA_all_sib_for_chukchi
+
+ ~/bin/bin/ploteig -i ~/results/pca_Chukchi_4.09.17.evec -c 1:2 -p Chukchi -x -o ~/results/PCA_all-chukchi_eig 
+
+  При этом в скрипте программы надо удалить строчку с greenfix.Для этого набираем nano ~/bin/bin/ploteig и стираем строчку вручную  
+
+
+
+  ADMIXTURE
+  Установка: 
+cd ~
+mkdir bin
+cd bin
+wget http://www.genetics.ucla.edu/software/admixture/binaries/admixture_linux-1.3.0.tar.gz
+tar xzf admixture_linux-1.3.0.tar.gz
+rm admixture_linux-1.3.0.tar.gz
+mv admixture_linux-1.3.0/admixture ~/bin
+rm -rf admixture_linux-1.3.0/
+ls
+Для проведения admixture-анализа потребуется датасет в plink/bed-формате.
+
+Подготовим данные. Для этого нужно создать папку, перейти в неё, скачать и разархивировать датасет, удалить файл архива:
+cd ~
+mkdir reich_datasets
+cd reich_datasets
+wget https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/ScythianSarmatian.tar.gz
+tar xzf ScythianSarmatian.tar.gz
+rm ScythianSarmatian.tar.gz
+ls
+Так как скачанные данные сохранены в eigenstrat-формате, то предварительно нужно сконвертировать их в bed-формат. Для этого понадобится две программы: plink и converft.
+Качаем плинк. 
+cd ~/bin
+wget https://www.cog-genomics.org/static/bin/plink170702/plink_linux_x86_64.zip
+unzip plink_linux_x86_64.zip
+rm plink_linux_x86_64.zip LICENSE toy.map toy.ped
+ls
+Качаем eigensoft
+cd ~/bin
+wget https://data.broadinstitute.org/alkesgroup/EIGENSOFT/EIG-6.1.4.tar.gz
+tar xzf EIG-6.1.4.tar.gz
+cp EIG-6.1.4/bin/* .
+rm -rf EIG-6.1.4*
+После установки EIGENSOFT, частью которого является convertf, можно начать конвертацию датасета. Для этого нужно подготовить конфигурационный файл со следующим содержанием (в моём случае):
+
+PATH:            /home/stasundr@mcb.nsc.ru/reich_datasets
+genotypename:    PATH/ScythianSarmatian.geno
+snpname:         PATH/ScythianSarmatian.snp
+indivname:       PATH/ScythianSarmatian.ind
+outputformat:    PACKEDPED
+genotypeoutname: PATH/ScythianSarmatian.bed
+snpoutname:      PATH/ScythianSarmatian.pedsnp
+indivoutname:    PATH/ScythianSarmatian.pedind
+familynames:     NO
+Для этого можно использовать текстовый редактор nano. Чтобы сохранить содержимое файла во время работы в nano нужно нажать ctrl + o, а чтобы выйти ctrl + x.
+
+nano ~/ScythianSarmatian.converft.par
+~/bin/convertf -p ~/ScythianSarmatian.converft.par
+
+
+___________________
+Запуск PLINK2
+ 
+
+ ~/bin/plink2 --bfile ~/results/mydata (Если не открывает и говорит, что проблема с файлом bed, то пробуем ~/bin/plink2 --bfile ~/results/mydata --make-bed --out ~/results/mydata_plink). В данных Дэвида не будет работать из-за неподходящего наполнения в bed. 
+
+
+---
+чтобы соединить два датасета делаем доп документы
+1. Первый датасет 
+ PATH: /home/kamanova@mcb.nsc.ru/dataset/EuropeFullyPublic
+genotypename: PATH/release.geno
+snpname:      PATH/release.snp
+indivname:    PATH/release.ind
+outputformat:    ANCESTRYMAP,  EIGENSTRAT, PED, PACKEDPED or PACKEDANCESTRYMAP
+                 (Default is PACKEDANCESTRYMAP.)
+genooutfilename:   /home/kamanova@mcb.nsc.ru/results/1data.geno
+snpoutfilename:    /home/kamanova@mcb.nsc.ru/results/1data.snp
+indoutfilename:    /home/kamanova@mcb.nsc.ru/results/1data.ind
+poplistname:       /home/kamanova@mcb.nsc.ru/par/poplist_sibiria
+
+Не забудь создать поплист!
+
+2. Второй датасет
+PATH: /home/kamanova@mcb.nsc.ru/dataset
+genotypename: PATH/allmap.geno
+snpname:      PATH/allmap.snp
+indivname:    PATH/allmap.ind
+outputformat:    ANCESTRYMAP,  EIGENSTRAT, PED, PACKEDPED or PACKEDANCESTRYMAP
+                 (Default is PACKEDANCESTRYMAP.)
+genooutfilename:   /home/kamanova@mcb.nsc.ru/results/2data.geno
+snpoutfilename:    /home/kamanova@mcb.nsc.ru/results/2data.snp
+indoutfilename:    /home/kamanova@mcb.nsc.ru/results/2data.ind
+poplistname:       /home/kamanova@mcb.nsc.ru/par/poplist_sibiria2
+
+Что представляет собой poplistname:  
+poplistname:       /home/kamanova@mcb.nsc.ru/par/poplist_sibiria2
+
+Japanese
+Russian
+Yakut
+Mongola
+
+
+3. После создание двух документов, создаем третий
+PATH: /home/kamanova@mcb.nsc.ru/dataset/EuropeFullyPublic
+geno1: /home/kamanova@mcb.nsc.ru/results/2data.geno
+snp1:  /home/kamanova@mcb.nsc.ru/results/2data.snp
+ind1:  /home/kamanova@mcb.nsc.ru/results/2data.ind
+geno2: /home/kamanova@mcb.nsc.ru/results/1data.geno
+snp2:  /home/kamanova@mcb.nsc.ru/results/1data.snp
+ind2:  /home/kamanova@mcb.nsc.ru/results/1data.ind
+genotypeoutfilename:/home/kamanova@mcb.nsc.ru/results/mix_sibpops.geno
+snpoutfilename:     /home/kamanova@mcb.nsc.ru/results/mix_sibpops.snp
+indivoutfilename:   /home/kamanova@mcb.nsc.ru/results/mix_sibpops.ind
+allowdups: YES
+
+______________________
+ALDER
+
+Создаем доп документ 
+ PATH: /home/kamanova@mcb.nsc.ru/dataset/EuropeFullyPublic
+      genotypename: PATH/release.geno
+      snpname:      PATH/release.snp
+      indivname:    PATH/release.ind
+      admixpop:     Chukchi
+      refpops:       Ulchi;Chukchi;Nganasan;Tubalar;Even;Japanese;Russian;Yakut;Yi;Miao;Manden;Tuvinian;Mordovian;Selkup;Korean;Aleut
+
+
+
+
+
+
+ ------------------------
+
+Для построения РСА 
+ Сам файл с данными качаем из терминала с помощью программы cyberduck (cl.mcb.nsc.ru). Качайм файл который выдает кинг с расширением ped: /home/kamanova@mcb.nsc.ru/results/king_f_pcapc.ped
+
+ сам скрипт:
+#скачиваемsetwd ("/Users/katya/Desktop")
+#делаем матрицу
+nano
+
+ Для цветной картинке делаем так. Создаем новую таблицу
+ setwd ("/Users/katya/Desktop")
+pca <-read.csv("./vdata_king_all_chukchi_pcapc.ped", sep = " ", header = F)
+print(pca)
+pca$V2 <- c("Chukchi1","Chukchi2","Chukchi3","Chukchi4","Chukchi5","Chukchi6","Chukchi7","Chukchi8","Chukchi9","Chukchi10","Chukchi11","Chukchi12","Chukchi13","Chukchi14","Chukchi15","Chukchi16","Chukchi17","Chukchi18","Chukchi19","Chukchi20")
+df <- pca[,c("V2","V7","V8")]
+plot(df$V7,df$V8)
+library(ggplot2)
+df <- pca[,c("V2","V7","V8")]
+ggplot(df, aes(x=V7, y= V8, col = V2)) +
+  geom_point()
+
+На месте цифр 7 и 9 должны бить колонки с главными компонентами. Обрати внимание, что King по умолчанию выдает 20 компонент.
+
+
+
+
+
+Ecли произошла ошибка в терминале и он завис,то:
+открываем новую вкладку fn + F2 в ней пишем ps -ef | grep kamanova. Ps показываает запущенные сейчас процессы, а grep kamanova фильтрует (я искал процессы, которые ты запустила).выполнил команду kill -15 xxxx (вместо иксов был номер этого процесса). kill -15 очень мягко закрывается программу
+еще есть kill -9 (это если kill -15 не работает).
+
+
