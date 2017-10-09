@@ -27,3 +27,46 @@
 	В документе  пишем (решетка нужна в коде!)
 	#!/bin/bash. #обозначет что сейчас пойдет скрипт
 	~/bin/adapterremoval-2.1.7/build/Adapterremoval.1 $*
+далее запускаем программу, чтобы найти чипы Illumina:	
+		~/bin/adapterremoval --file1 ~/dataset/fastq/161117_HSGA.Dremov_2016.Nvh03.fastq  --basename nvh03.t
+		est.adapterremove --trimns --bzip2 --threads 26 
+	чтобы запускать программу и адаптерами не illumina
+		~/bin/adapterremoval --file1 ~/dataset/fastq/161117_HSGA.Dremov_2016.Nvh03.fastq  --basename nvh03.test.adapterremove --trimns --bzip2 --threads 26 --adapter-list ~/dataset/fastq/adapter_nvh03
+	выписываем адаптеры из программы Udgene вручную в одельный текстовый документ в два столбца. 
+
+	3.  BWA MEM
+	для установки 
+		git clone https://github.com/lh3/bwa.git
+		cd bwa; make 
+	необходимо на кластер закачать референс, затем проводим индексирование и картирование
+		bwa index ref.fa
+		bwa mem ref.fasta mydata.fastq > map.sam
+	полученное вырвнивание необходимо анализировать с помощью программы Samtools
+	4. Samtools ( те же фуенции выполняет gatk)
+	для установки:
+		$ wget https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2 -O samtools.tar.bz2
+		$ tar -xjvf samtools.tar.bz2
+		$ cd samtools-{version}
+		$ make
+    BCFtools:
+        $ wget https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2 -O bcftools.tar.bz2
+		$ tar -xjvf bcftools.tar.bz2
+		$ cd bcftools-{version}
+		$ make
+	HTSlib:
+		$ wget https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2 -O htslib.tar.bz2
+  		$ tar -xjvf htslib.tar.bz2
+		$ cd htslib-{version}
+		$ make
+	ДЛя работы:
+	#необходимо снова переиндексировать референс (сначала индексировали через bwa mem, теперь через samtools)
+		$samtools faidx ref.fa
+		$ samtools sort --threads 8 --reference ~/bin/bwa/ref.fa -O BAM -o ~/results/Nvh03.bwa_mem.samtools_sort.bam ~/results/Nvh03.bwa_mem.sam
+	# У тебя есть картированный риды, но их место не заффиксировано, т. е теперь надо отсортировать риды по их положению.ПРимер: я знаю, что рид 2568,б7б,49,7б,28 занимает первое положение на референсе, т.е теперь надо отсортировать именно по этому положению, выбрать все возможные риды, которые принадлежать 1,2,3,4,... месту на рсрс). Сортировка требует больших затрат памяти, поэтому для экономии ресурсов программа записывает промежуточные BAM-файлы. По умолчанию используется порог в 768 MiB на один поток выполнения. С помощью опции -m можно менять этот порог, а с помощью -@ можно увеличивать количество потоков.
+	# необходимо создать файлы в формате vcf. -V,-u определяет расширение конечного файла,
+		$ samtools mpileup -v -u -f ~/bin/bwa/ref.fa ~/results/Nvh03.bwa_mem.samtools_sort.bam
+
+Итог: samtools собирает сводную информацию во входные файлы bam, вычисляет вероятность каждого возможного генотипа и формирует другой формат (vcf/bcf)
+
+	5. Далее используем программу bcftools
+	команда view позволяяет выбрать только нуклеотиды, отличающиеся от референса. Но для ее использования необходиомо запаковать входной файл в file.vcf.gz. Запаковываем командой gzip mydata.ext
