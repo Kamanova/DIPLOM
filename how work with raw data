@@ -40,8 +40,32 @@
 	необходимо на кластер закачать референс, затем проводим индексирование и картирование
 		bwa index ref.fa
 		bwa mem ref.fasta mydata.fastq > map.sam
-	полученное вырвнивание необходимо анализировать с помощью программы Samtools
-	4. Samtools ( те же фуенции выполняет gatk)
+4. Gatk
+	сортируем наши риды 
+		$java -jar ~/bin/picard.jar SortSam I= ~/test.nvh03/nvh_bwamem.sam O= ~/test.nvh03/nvh_bwamem_sorted.sam SO=coordinate
+	маркируем дублирующиеся риды 
+		$java -jar ~/bin/picard.jar MarkDuplicates I= ~/test.nvh03/nvh_bwamem_sorted.sam O= ~/test.nvh03/nvh_bwamem_sorted_markdupl.sam M= ~/test.nvh03/metrix_markdupl.txt
+	Добавляем необходимую инфу в заголовок к файлу
+	 	$java -jar ~/bin/picard.jar AddOrReplaceReadGroups I= ~/test.nvh03/nvh_bwamem_sorted_markdupl_addoreplacereadgroups.sam O= ~/test.nvh03/nvh_bwamem_sorted_markdupl_addoreplacereadgroups_.bam LB=161117_HSGA.Dremov_2016 RGPL=illumina RGPU=LB RGSM=nvh03
+	делаем bam
+		$java -jar ~/bin/picard.jar SamFormatConverter I= ~/test/nvh_bwamem_sorted_markdupl_addoreplacereadgroups.sam O= ~/test/nvh_bwamem_sorted_markdupl_addoreplacereadgroups.bam 	
+	 Необходимо проиндексировать файл 
+	 	$java -jar ~/bin/picard.jar BuildBamIndex I= ~/test.nvh03/nvh_bwamem_sorted_markdupl_addoreplacereadgroups__.bam
+
+	 используя samtools еще раз индексируем референс
+	 	$samtools faidx ~/test/RSRS.fasta
+
+	создаем для rsrs формат dict
+		$java -jar ~/bin/picard.jar CreateSequenceDictionary R= ~/bin/bwa/ref.fa O= ~/test.nvh03/ref.dict
+
+	Тперь выбираем только мутации из всей последовательности
+	 	$java -jar ~/bin/GenomeAnalysisTK-3.8-0-ge9d806836/GenomeAnalysisTK.jar -R ~/test/RSRS.fasta -T HaplotypeCaller -I ~/test/nvh_bwamem_sorted_markdupl_addoreplacereadgroups.bam -o ~/test/nvh_bwamem_sorted_markdupl_addoreplacereadgroups.g.vcf
+
+
+	
+
+Можно пользоваться samtools, но это не удобно 
+4. Samtools ( те же фуенции выполняет gatk)
 	для установки:
 		$ wget https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2 -O samtools.tar.bz2
 		$ tar -xjvf samtools.tar.bz2
