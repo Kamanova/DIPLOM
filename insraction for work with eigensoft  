@@ -3,6 +3,7 @@ convertf (понимает bed, geno, ped, делает geno, (ped и bed, но 
 convertfs (понимает geno, делает bed или unpacked geno)
 plink (понимает bed и ped)
 king (понимает только bed)
+Admixture
 
 если при скачивании программы файл загрузился на сервер как текстовый, то ввести сhom a+x
 
@@ -119,11 +120,18 @@ genotypeoutname: PATH/ScythianSarmatian.bed
 snpoutname:      PATH/ScythianSarmatian.pedsnp
 indivoutname:    PATH/ScythianSarmatian.pedind
 familynames:     NO
+
 Для этого можно использовать текстовый редактор nano. Чтобы сохранить содержимое файла во время работы в nano нужно нажать ctrl + o, а чтобы выйти ctrl + x.
 
 nano ~/ScythianSarmatian.converft.par
 ~/bin/convertf -p ~/ScythianSarmatian.converft.par
 
+Для перевода в форматы bim,bed,fam необходимо использовать программу  convertfs. В этом случае par файл не нужен ( достаточно указать путь к geno файлу)
+
+convertfs -p ~/mydata
+
+Чтобы запустить программу admixture: admixture ~/myfile/mydata.bed 3 > ~/mydataout
+3 - число предполагаемых предковых популяций.
 
 ___________________
 Запуск PLINK2
