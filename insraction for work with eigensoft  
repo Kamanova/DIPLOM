@@ -201,11 +201,6 @@ ALDER
       admixpop:     Chukchi
       refpops:       Ulchi;Chukchi;Nganasan;Tubalar;Even;Japanese;Russian;Yakut;Yi;Miao;Manden;Tuvinian;Mordovian;Selkup;Korean;Aleut
 
-
-
-
-
-
  ------------------------
 
 Для построения РСА 
@@ -237,5 +232,43 @@ ggplot(df, aes(x=V7, y= V8, col = V2)) +
 Ecли произошла ошибка в терминале и он завис,то:
 открываем новую вкладку fn + F2 в ней пишем ps -ef | grep kamanova. Ps показываает запущенные сейчас процессы, а grep kamanova фильтрует (я искал процессы, которые ты запустила).выполнил команду kill -15 xxxx (вместо иксов был номер этого процесса). kill -15 очень мягко закрывается программу
 еще есть kill -9 (это если kill -15 не работает).
+
+————————————————————————————————————————————-
+Для подсчета f3 статистики используем программу qp3pop
+
+qp3Pop -p ~/datasets/par-qp3pop-nivkh-Koryak-x > ~/datasets/result-f3-nivkh-vietnamese-x
+ 
+parfile:
+
+PREFIX:       /home/kamanova/datasets/omni-fed-cardona/omni-cardona-fedorova.stas
+genotypename: /home/kamanova/datasets/omni-fed-cardona/omni-cardona-fedorova.stas.geno
+snpname:      /home/kamanova/datasets/omni-fed-cardona/omni-cardona-fedorova.stas.snp
+indivname:    /home/kamanova/datasets/omni-fed-cardona/omni-cardona-fedorova.stas.ind
+popfilename:  /home/kamanova/datasets/omni-fed-cardona/list_qp3_nivkh-vietnames-x
+
+Poplist:
+
+Vietnamese Chelkan Nivkh
+Vietnamese Kumandin Nivkh
+Vietnamese Orok Nivkh
+Vietnamese Todzhu Nivkh
+Vietnamese Teleut Nivkh
+Vietnamese Hakas Nivkh
+Vietnamese Shor Nivkh
+
+Для построение графика в R использовать скрипт:
+
+setwd ("/Users/katya/Desktop")
+f3dat=read.table("result-f3-nivkh-vietnamese-x.csv", sep=';', header=T)
+print(f3dat)
+s = f3dat[f3dat$Target == "Nivkh",]
+sOrdered = s[order(-s$f_3),]
+library(Hmisc)
+errbar(1:18, sOrdered$f_3[1:18],
+       (sOrdered$f_3+sOrdered$std.err)[1:18],
+       (sOrdered$f_3-sOrdered$std.err)[1:18], pch=20, las=2, cex.axis=0.4, xaxt='n',
+       xlab="population", ylab="F3")
+axis(1, at=1:18, labels=sOrdered$Source2[1:18], las=2, cex.axis=0.6)
+
 
 
